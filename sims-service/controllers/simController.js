@@ -67,7 +67,6 @@ const addSim = async (req, res) => {
 };
 
 const getAllSims = async (req, res) => {
-  console.log(req.query.limit);
   let where = {};
   req.query.operator ? (where.operator = req.query.operator.split(',')) : null;
   req.query.areaCode
@@ -112,10 +111,8 @@ const getAllSims = async (req, res) => {
 
 const getSingleSim = async (req, res) => {
   const phoneNumber = req.params.phoneNumber;
-  console.log(phoneNumber);
-  const sims = await Sim.findAll({
-    where: { phoneNumber: phoneNumber },
-    include: [{ model: User }],
+  const sims = await Sim.findByPk(phoneNumber, {
+    // include: [{ model: User }],
   });
   if (!sims) {
     throw new NotFoundError('cant find any number with this phone number');

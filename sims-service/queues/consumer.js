@@ -34,7 +34,7 @@ const consumeUserRegisterDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'register';
-    const queueName = 'UserRegisterQueue';
+    const queueName = 'UserRegisterSimQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,

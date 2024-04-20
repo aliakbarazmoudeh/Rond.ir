@@ -9,7 +9,6 @@ const publishDirectMessage = async (exchangeName, routingKey, message) => {
       routingKey,
       Buffer.from(JSON.stringify(message))
     );
-    console.log('Message sent succecfuly');
   } catch (error) {
     console.log(
       'error',

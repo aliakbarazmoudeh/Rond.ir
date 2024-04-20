@@ -6,6 +6,7 @@ const express = require('express');
 const app = express();
 // rest of the packages
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 const rateLimiter = require('express-rate-limit');
 const helmet = require('helmet');
 const xss = require('xss-clean');
@@ -13,13 +14,10 @@ const cors = require('cors');
 
 // database
 const connectDB = require('./db/connect');
-
-// rabbit mq
-// const {
-//   consumeUserDeleteDirectMessage,
-//   consumeUserRegisterDirectMessage,
-//   consumeUserUpdateDirectMessage,
-// } = require('./queues/consumer');
+const event = require('../commen/utils/removeOldRecords').query(
+  'ads',
+  'expireAt'
+);
 
 //  routers
 const adsRouter = require('./routes/adsRoutes');
@@ -41,19 +39,19 @@ app.use(xss());
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(fileUpload({ useTempFiles: true }));
 
 app.use(adsRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5002;
+
 const start = async () => {
   try {
     // { alter: true }
     await connectDB.sync({ alter: true, logging: false });
-    // await consumeUserRegisterDirectMessage();
-    // await consumeUserDeleteDirectMessage();
-    // await consumeUserUpdateDirectMessage();
+    await connectDB.query(event);
     console.log('connected to db');
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)

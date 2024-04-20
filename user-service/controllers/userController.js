@@ -243,11 +243,13 @@ const deleteUser = async (req, res) => {
   }
   await publishDirectMessage('User', 'delete', { phoneNumber: req.user });
   await user.destroy();
-  res.cookie('token', 'logout', {
-    httpOnly: true,
-    expires: new Date(Date.now() + 1),
-  });
-  res.status(StatusCodes.OK).json({ user });
+  res
+    .cookie('token', 'logout', {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1),
+    })
+    .status(StatusCodes.OK)
+    .json({ user });
 };
 
 module.exports = {
