@@ -36,10 +36,8 @@ const createAd = async (req, res) => {
   if (productImage.size > maxSize) {
     throw new BadRequestError('Please upload image smaller 0.5MB');
   }
-  const imagePath = path.join(
-    __dirname,
-    '../../public/ads/' + `${productImage.name}`
-  );
+  const imagePath = path.join(__dirname, '../../ads/' + `${productImage.name}`);
+  console.log(imagePath);
   await productImage.mv(imagePath);
   const ad = await Ad.create({
     owner: req.user,

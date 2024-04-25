@@ -14,7 +14,7 @@ const cors = require('cors');
 
 // database
 const connectDB = require('./db/connect');
-const event = require('../commen/utils/removeOldRecords').query(
+const event = require('./commen/utils/removeOldRecords').query(
   'ads',
   'expireAt'
 );
@@ -50,7 +50,7 @@ const port = process.env.PORT || 5002;
 const start = async () => {
   try {
     // { alter: true }
-    await connectDB.sync({ alter: true, logging: false });
+    await connectDB.sync({ logging: false });
     await connectDB.query(event);
     console.log('connected to db');
     app.listen(port, () =>

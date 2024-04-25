@@ -1,0 +1,84 @@
+# docker compose up -d redis mongodb mysql postgres rabbitmq elasticsearch kibana
+version: '3.9'
+services:
+  mysql:
+    container_name: mysql_container
+    hostname: mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_USER=rond
+      - MYSQL_DATABASE=rond_user_service
+      - MYSQL_ROOT_PASSWORD=rondpassword
+      - MYSQL_PASSWORD=rondpassword
+    ports:
+      - '3307:3306'
+    volumes:
+      - ./docker-volumes/mysql:/var/lib/mysql
+
+  rabbitmq:
+    container_name: rabbitmq_container
+    image: rabbitmq:3.13-rc-management-alpine
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rond
+      - RABBITMQ_DEFAULT_PASS=rondpass
+    ports:
+      # AMQP protocol
+      - '5672:5672'
+      # rabbitmq Management
+      - '15672:15672'
+
+  user-service:
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5000:5000
+    env_file: ./user-service/.env
+    environment:
+      - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
+      - MYSQL_DB=mysql://rond:rondpassword@mysql_container:3306/rond_user_service
+    depends_on:
+      - mysql
+      - rabbitmq
+
+  sims-service:
+    container_name: sims-service
+    build:
+      context: ./sims-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5001:5001
+    env_file: ./sims-service/.env
+    environment:
+      - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
+      - MYSQL_DB=mysql://emam:password@mysql_container:3306/rond_sims_service
+    depends_on:
+      - mysql
+      - rabbitmq
+
+  ads-service:
+    container_name: ads-service
+    build:
+      context: ./ads-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5002:5002
+    env_file: ./ads-service/.env
+    environment:
+      - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
+      - MYSQL_DB=mysql://emam:password@mysql_container:3306/rond_ads_service
+    volumes:
+      - shared-volumes:/ads/
+    depends_on:
+      - mysql
+      - rabbitmq
+
+volumes:
+  shared-volumes:

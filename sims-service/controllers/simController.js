@@ -2,7 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { Op } = require('sequelize');
 const Sim = require('../models/Sim');
-const Iran = require('../../commen/utils/iran');
+const Iran = require('../commen/utils/iran');
 const User = require('../models/User');
 
 const addSim = async (req, res) => {

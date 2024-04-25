@@ -7,7 +7,7 @@ const {
 const User = require('../models/User');
 const LegalUser = require('../models/legalUser');
 const bcrypt = require('bcryptjs');
-const Iran = require('../../commen/utils/iran');
+const Iran = require('../commen/utils/iran');
 const { publishDirectMessage } = require('../queues/producer');
 
 const legalUserRegister = async (req, res) => {
