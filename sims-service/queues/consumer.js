@@ -50,7 +50,7 @@ const consumeUserRegisterDirectMessage = async (channel) => {
   } catch (error) {
     console.log(
       'error',
-      'GigService GigConsumer consumeGigDirectMessage() method error'
+      'SimService SimConsumer consumeUserRegisterDirectMessage() method error'
     );
   }
 };
@@ -62,7 +62,7 @@ const consumeUserDeleteDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'delete';
-    const queueName = 'UserDeleteQueue';
+    const queueName = 'UserDeleteSimQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
@@ -78,7 +78,7 @@ const consumeUserDeleteDirectMessage = async (channel) => {
   } catch (error) {
     console.log(
       'error',
-      'GigService GigConsumer consumeGigDirectMessage() method error'
+      'SimService SimConsumer consumeUserDeleteDirectMessage() method error'
     );
   }
 };
@@ -90,7 +90,7 @@ const consumeUserUpdateDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'update';
-    const queueName = 'UserUpdateQueue';
+    const queueName = 'UserUpdateSimQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
@@ -106,7 +106,7 @@ const consumeUserUpdateDirectMessage = async (channel) => {
   } catch (error) {
     console.log(
       'error',
-      'GigService GigConsumer consumeGigDirectMessage() method error'
+      'SimService SimConsumer consumeUserUpdateDirectMessage() method error'
     );
   }
 };

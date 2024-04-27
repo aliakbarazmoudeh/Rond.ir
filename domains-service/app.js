@@ -23,7 +23,7 @@ const {
 } = require('./queues/consumer');
 
 //  routers
-const simRouter = require('./routes/simRoutes');
+const domainRouter = require('./routes/domainRoutes');
 
 // middleware
 const notFoundMiddleware = require('./middleware/not-found');
@@ -43,15 +43,15 @@ app.use(xss());
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
-app.use(simRouter);
+app.use(domainRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5002;
 const start = async () => {
   try {
     // { alter: true }
-    await connectDB.sync({ logging: false });
+    await connectDB.sync({ alter: true, logging: false });
     await consumeUserRegisterDirectMessage();
     await consumeUserDeleteDirectMessage();
     await consumeUserUpdateDirectMessage();

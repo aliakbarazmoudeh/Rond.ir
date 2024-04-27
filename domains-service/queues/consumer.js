@@ -34,7 +34,7 @@ const consumeUserRegisterDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'register';
-    const queueName = 'UserRegisterSimQueue';
+    const queueName = 'UserRegisterDomainQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
@@ -62,7 +62,7 @@ const consumeUserDeleteDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'delete';
-    const queueName = 'UserDeleteQueue';
+    const queueName = 'UserDeleteDomainQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
@@ -78,7 +78,7 @@ const consumeUserDeleteDirectMessage = async (channel) => {
   } catch (error) {
     console.log(
       'error',
-      'GigService GigConsumer consumeGigDirectMessage() method error'
+      'DomainService DomainConsumer consumeUserDeleteDirectMessage() method error'
     );
   }
 };
@@ -90,7 +90,7 @@ const consumeUserUpdateDirectMessage = async (channel) => {
     }
     const exchangeName = 'User';
     const routingKey = 'update';
-    const queueName = 'UserUpdateQueue';
+    const queueName = 'UserUpdateDomainQueue';
     await channel.assertExchange(exchangeName, 'direct');
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
@@ -106,7 +106,7 @@ const consumeUserUpdateDirectMessage = async (channel) => {
   } catch (error) {
     console.log(
       'error',
-      'GigService GigConsumer consumeGigDirectMessage() method error'
+      'DomainService DomainConsumer consumeUserUpdateDirectMessage() method error'
     );
   }
 };

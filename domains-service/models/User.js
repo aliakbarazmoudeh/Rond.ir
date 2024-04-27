@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../db/connect');
-const Sim = require('./Sim');
+const Domain = require('./Domain');
 
 const User = sequelize.define(
   'User',
@@ -52,13 +52,13 @@ const User = sequelize.define(
   { createdAt: false, updatedAt: false }
 );
 
-User.hasMany(Sim, {
+User.hasMany(Domain, {
   foreignKey: 'owner',
   onDelete: 'cascade',
   onUpdate: 'cascade',
   hooks: true,
 });
-Sim.belongsTo(User, {
+Domain.belongsTo(User, {
   foreignKey: 'owner',
   onDelete: 'cascade',
   onUpdate: 'cascade',

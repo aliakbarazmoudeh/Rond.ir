@@ -112,12 +112,11 @@ const getAllSims = async (req, res) => {
 const getSingleSim = async (req, res) => {
   const phoneNumber = req.params.phoneNumber;
   const sims = await Sim.findByPk(phoneNumber, {
-    // include: [{ model: User }],
+    include: [{ model: User }],
   });
   if (!sims) {
     throw new NotFoundError('cant find any number with this phone number');
   }
-
   res.status(StatusCodes.OK).json({ sims });
 };
 
@@ -130,7 +129,17 @@ const getAllSimsFromUnkUser = async (req, res) => {
 };
 
 const getAllUserSims = async (req, res) => {
-  const user = await User.findByPk(req.user, { include: { model: Sim } });
+  const user = await User.findByPk(req.user, {
+    include: {
+      model: Sim,
+      order: [
+        ['plan', 'desc'],
+        ['updatedAt', 'desc'],
+      ],
+      limit: parseInt(req.query.limit) || null,
+      offset: parseInt(req.query.offset) || null,
+    },
+  });
   res.status(StatusCodes.OK).json({ user });
 };
 
