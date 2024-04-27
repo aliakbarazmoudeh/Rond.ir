@@ -13,7 +13,7 @@ const { Sequelize } = require('sequelize');
 //   }
 // );
 
-// connection for prod
+// connection for production mode
 const sequelize = new Sequelize(process.env.MYSQL_DB, {
   dialect: 'mysql',
   logging: false,

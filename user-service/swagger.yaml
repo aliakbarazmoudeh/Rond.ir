@@ -1,0 +1,126 @@
+openapi: 3.0.0
+info:
+  title: Rond
+  version: 1.0.0
+servers:
+- url: 'http://localhost:5000'
+tags:
+- name: User
+paths:
+  /api/login:
+    post:
+      tags:
+      - User
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNumber: 09157156684
+                password: '12345678'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/registerLegalUser:
+    post:
+      tags:
+      - User
+      summary: Create Legal User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNumber: 09125255252
+                firstName: ابوالفظل
+                lastName: رضایی
+                email: aboulfazlRezaee@gmail.com
+                nationalCode: 0926979494
+                city: مشهد
+                province: خراسان رضوي
+                companyName: دلتا گروپ
+                nationalId: 00926979494
+                registerationCode: '123456'
+                address: حالا بماند کجا
+                postalCode: '1234567891'
+                telephoneNumber: 09155255252
+                password: '12345678'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/registerNormalUser:
+    post:
+      tags:
+      - User
+      summary: Create Normal User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNumber: 09157156684
+                firstName: علی اکبر
+                lastName: آزموده
+                email: aliakbarazmoudeh@gmail.com
+                nationalCode: 0926979494
+                city: مشهد
+                province: خراسان رضوي
+                password: '12345678'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/user:
+    delete:
+      tags:
+      - User
+      summary: Deleting User
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+      - User
+      summary: Current User
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    patch:
+      tags:
+      - User
+      summary: Update User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                postalCode: '1234567891'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/user/09157156684:
+    get:
+      tags:
+      - User
+      summary: Getting Single User Information
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

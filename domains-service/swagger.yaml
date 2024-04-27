@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: Rond
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:5002'
+tags:
+  - name: Domains
+paths:
+  /api/domain:
+    post:
+      tags:
+        - Domains
+      summary: Create Domain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                domain: alogpt.co.com
+                domainInFarsi: امام
+                price: 10000
+                category: علم و تکنولوژی
+                termOfSale: 2
+                phone: 09157156684
+                description: ''
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    patch:
+      tags:
+        - Domains
+      summary: Update Domain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                oldDomain: alogpt.com
+                domain: alogpt.com
+                price: 14000
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Domains
+      summary: Delete Domain
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - Domains
+      summary: All Domains
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          example: emam
+        - name: domain
+          in: query
+          schema:
+            type: string
+          example: org
+        - name: price
+          in: query
+          schema:
+            type: integer
+          example: '1000'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/domain/alogpt.com:
+    get:
+      tags:
+        - Domains
+      summary: Single Domain
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/unkUserDomains:
+    post:
+      tags:
+        - Domains
+      summary: All Domains From Other User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                owner: 09157156684
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/userDomains:
+    get:
+      tags:
+        - Domains
+      summary: All User's Domains
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

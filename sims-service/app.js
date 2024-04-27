@@ -43,6 +43,12 @@ app.use(xss());
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
+// swagger
+const swaggerUI = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./swagger.yaml');
+
+app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use(simRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

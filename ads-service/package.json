@@ -28,7 +28,9 @@
     "mysql2": "^3.9.3",
     "pm2": "^5.3.1",
     "sequelize": "^6.37.2",
-    "xss-clean": "^0.1.1"
+    "swagger-ui-express": "^5.0.0",
+    "xss-clean": "^0.1.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.9"

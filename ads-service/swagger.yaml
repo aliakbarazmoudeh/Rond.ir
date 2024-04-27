@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: Rond
+  version: 1.0.0
+servers:
+- url: 'http://localhost:5003'
+tags:
+- name: Ads
+paths:
+  /api/ads:
+    post:
+      tags:
+      - Ads
+      summary: Create Ad
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      parameters:
+      - name: plan
+        in: query
+        schema:
+          type: integer
+        example: '5'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+      - Ads
+      summary: Get Ads
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+

@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Rond
+  version: 1.0.0
+servers:
+- url: 'http://localhost:5001'
+tags:
+- name: Sim
+paths:
+  /api/sim:
+    post:
+      tags:
+      - Sim
+      summary: Create Sim
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNumber: 09151234568
+                operator: MCI
+                price: 10000
+                status: 1
+                simType: 1
+                rondType: 7
+                termsOfSale: 0
+                plan: 1
+                province: خراسان رضوي
+                city: مشهد
+                discription: فاقد توضیحات
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+      - Sim
+      summary: All Sims
+      parameters:
+      - name: owner
+        in: query
+        schema:
+          type: integer
+        example: 09157156684
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    patch:
+      tags:
+      - Sim
+      summary: Update Sim
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+      - Sim
+      summary: Delete Sim
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/userSims:
+    get:
+      tags:
+      - Sim
+      summary: User's Sims
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/unkUserSims:
+    post:
+      tags:
+      - Sim
+      summary: Unknown User's Sims
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                owner: 09157156684
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/sim/09151234568:
+    get:
+      tags:
+      - Sim
+      summary: Single Sim
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+

@@ -26,6 +26,11 @@ const adsRouter = require('./routes/adsRoutes');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
+// swagger
+const swaggerUI = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./swagger.yaml');
+
 app.set('trust proxy', 1);
 app.use(
   rateLimiter({
@@ -41,11 +46,12 @@ app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(fileUpload({ useTempFiles: true }));
 
+app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use(adsRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 5002;
+const port = process.env.PORT || 5003;
 
 const start = async () => {
   try {

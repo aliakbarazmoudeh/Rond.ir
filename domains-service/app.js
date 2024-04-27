@@ -29,6 +29,11 @@ const domainRouter = require('./routes/domainRoutes');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
+// swagger
+const swaggerUI = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./swagger.yaml');
+
 app.set('trust proxy', 1);
 app.use(
   rateLimiter({
@@ -43,6 +48,7 @@ app.use(xss());
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
+app.use('/api-doc', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use(domainRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
