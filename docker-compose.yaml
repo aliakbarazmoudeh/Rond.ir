@@ -104,6 +104,31 @@ services:
       - mysql
       - rabbitmq
 
+  phones-service:
+    container_name: phones-service
+    build:
+      context: ./phones-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5003:5003
+    env_file: ./phones-service/.env
+    environment:
+      - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
+      - MYSQL_DB=mysql://emam:password@mysql_container:3306/rond_phones_service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./phones-service
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./package.json
+    depends_on:
+      - mysql
+      - rabbitmq
+
   ads-service:
     container_name: ads-service
     build:
@@ -111,7 +136,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - 5003:5003
+      - 5004:5004
     env_file: ./ads-service/.env
     environment:
       - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
@@ -130,6 +155,7 @@ services:
     depends_on:
       - mysql
       - rabbitmq
+
 
 volumes:
   shared-volumes:
