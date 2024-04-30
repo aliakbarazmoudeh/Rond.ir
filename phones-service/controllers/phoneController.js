@@ -59,6 +59,10 @@ const addPhone = async (req, res) => {
 
 const getAllPhones = async (req, res) => {
   let where = {};
+  let orderArray = [
+    ['plan', 'desc'],
+    ['updatedAt', 'desc'],
+  ];
   req.query.number
     ? (where.number = { [Op.like]: `%${req.query.number}%` })
     : null;
@@ -77,18 +81,30 @@ const getAllPhones = async (req, res) => {
   req.query.lt
     ? (where.price = { [Op.lt]: req.query.lt, [Op.gte]: req.query.gte || 0 })
     : null;
+  req.query.termsOfSale
+    ? (where.termsOfSale = req.query.termsOfSale.split(','))
+    : null;
+  if (req.query.sort) {
+    let temp = orderArray[0];
+    let temp2 = orderArray[1];
+    orderArray[0] = req.query.sort.split(',');
+    orderArray[1] = temp;
+    orderArray[2] = temp2;
+  }
   const phones = await Phone.findAll({
     where: where,
     include: [
       {
         model: User,
-        attributes: ['phoneNumber', 'telephoneNumber'],
+        attributes: [
+          'phoneNumber',
+          'telephoneNumber',
+          'companyName',
+          'address',
+        ],
       },
     ],
-    order: [
-      ['plan', 'desc'],
-      ['updatedAt', 'desc'],
-    ],
+    order: orderArray,
     limit: parseInt(req.query.limit) || 10,
     offset: parseInt(req.query.offset) || 0,
   });
