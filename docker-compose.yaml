@@ -129,6 +129,31 @@ services:
       - mysql
       - rabbitmq
 
+  saves-service:
+    container_name: saves-service
+    build:
+      context: ./saves-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5005:5005
+    env_file: ./saves-service/.env
+    environment:
+      - RABBITMQ_ENDPOINT=amqp://rond:rondpass@rabbitmq_container:5672
+      - MYSQL_DB=mysql://emam:password@mysql_container:3306/rond_saves_service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./saves-service
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./package.json
+    depends_on:
+      - mysql
+      - rabbitmq
+
   ads-service:
     container_name: ads-service
     build:
@@ -155,7 +180,6 @@ services:
     depends_on:
       - mysql
       - rabbitmq
-
 
 volumes:
   shared-volumes:
