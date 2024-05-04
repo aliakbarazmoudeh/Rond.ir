@@ -8,6 +8,7 @@ const {
   getAllUserPhones,
   getSinglePhone,
   updatePhone,
+  payment,
 } = require('../controllers/phoneController');
 const { authenticateUser } = require('../middleware/authentication');
 
@@ -19,6 +20,8 @@ router
   .delete(authenticateUser, deletePhone);
 router.route('/api/userPhones').get(authenticateUser, getAllUserPhones);
 router.route('/api/unkUserPhones').post(getAllPhonesFromUnkUser);
+
+router.use('/api/phone/payments', payment);
 
 router.route('/api/phone/:id').get(getSinglePhone);
 

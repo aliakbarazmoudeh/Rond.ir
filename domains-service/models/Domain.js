@@ -66,12 +66,17 @@ const Domain = sequelize.define(
       values: [1, 3, 5],
       defaultValue: 1,
     },
+    payment: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     description: {
       type: DataTypes.STRING,
       defaultValue: 'فاقد توضیحات',
     },
   },
-  { updatedAt: true, createdAt: true }
+  { updatedAt: true, createdAt: true, indexes: [{ fields: ['payment'] }] }
 );
 
 module.exports = Domain;

@@ -57,7 +57,7 @@ const port = process.env.PORT || 5001;
 const start = async () => {
   try {
     // { alter: true }
-    await connectDB.sync({ logging: false });
+    await connectDB.sync({ alter: true, logging: false });
     await consumeUserRegisterDirectMessage();
     await consumeUserDeleteDirectMessage();
     await consumeUserUpdateDirectMessage();

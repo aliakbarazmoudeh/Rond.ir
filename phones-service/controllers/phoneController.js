@@ -4,6 +4,8 @@ const { Op } = require('sequelize');
 const Phone = require('../models/Phone');
 const Iran = require('../commen/utils/iran');
 const User = require('../models/User');
+const createPayment = require('../commen/zarinpal/createPayment');
+const verifyPayment = require('../commen/zarinpal/verifyPayment');
 
 const addPhone = async (req, res) => {
   const owner = req.user;
@@ -47,14 +49,21 @@ const addPhone = async (req, res) => {
     termsOfSale,
     plan,
     discription,
+    payment: false,
   });
-  user.set({ productCount: user.dataValues.productCount - 1 });
-  await user.save();
-  res.status(StatusCodes.CREATED).json({
-    phone,
-    status: StatusCodes.CREATED,
-    msg: 'phone created successfully',
-  });
+  let amount;
+  phone.dataValues.plan === 1 ? (amount = 49000) : null;
+  phone.dataValues.plan === 3 ? (amount = 89000) : null;
+  phone.dataValues.plan === 5 ? (amount = 109000) : null;
+  const payment = await createPayment(
+    amount,
+    owner,
+    `http://localhost:${
+      process.env.PORT || 5003
+    }/api/phone/payments?productID=${phone.dataValues._id}&Amount=${amount}`
+  );
+  console.log(payment);
+  res.status(StatusCodes.CREATED).redirect(payment.url);
 };
 
 const getAllPhones = async (req, res) => {
@@ -201,6 +210,28 @@ const deletePhone = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: 'deleting phone number', phone });
 };
 
+const payment = async (req, res) => {
+  const { productID, Amount, Authority, Status } = req.query;
+  const product = await Phone.findByPk(productID);
+  if (Status != 'OK') {
+    await product.destroy();
+    throw new BadRequestError('invalid payment, pleas try again');
+  }
+  const paymentInfo = await verifyPayment(Amount, Authority);
+  if (
+    !paymentInfo.RefID ||
+    (paymentInfo.status < 100 && paymentInfo.status > 101)
+  ) {
+    await product.destroy();
+    throw new BadRequestError('invalid payments, pleas try again later');
+  }
+  product.set({ payment: true });
+  product.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: 'payment was successfull, congratulation!' });
+};
+
 module.exports = {
   addPhone,
   getAllPhones,
@@ -209,4 +240,5 @@ module.exports = {
   getAllUserPhones,
   updatePhone,
   deletePhone,
+  payment,
 };

@@ -4,6 +4,8 @@ const { Op } = require('sequelize');
 const Sim = require('../models/Sim');
 const Iran = require('../commen/utils/iran');
 const User = require('../models/User');
+const createPayment = require('../commen/zarinpal/createPayment');
+const verifyPayment = require('../commen/zarinpal/verifyPayment');
 
 const addSim = async (req, res) => {
   const owner = req.user;
@@ -56,14 +58,21 @@ const addSim = async (req, res) => {
     city,
     plan,
     discription,
+    payment: false,
   });
-  user.set({ productCount: user.dataValues.productCount - 1 });
-  await user.save();
-  res.status(StatusCodes.CREATED).json({
-    sim,
-    status: StatusCodes.CREATED,
-    msg: 'sim created successfuly',
-  });
+  let amount;
+  plan === 1 ? (amount = 49000) : null;
+  plan === 3 ? (amount = 89000) : null;
+  plan === 5 ? (amount = 109000) : null;
+  const payment = await createPayment(
+    amount,
+    owner,
+    `http://localhost:${process.env.PORT || 5001}/api/sim/payments?productID=${
+      sim.dataValues.phoneNumber
+    }&Amount=${amount}`
+  );
+  console.log(payment);
+  res.status(StatusCodes.CREATED).redirect(payment.url);
 };
 
 const getAllSims = async (req, res) => {
@@ -184,6 +193,26 @@ const deleteSim = async (req, res) => {
   res.status(StatusCodes.OK).json({ sim });
 };
 
+const payment = async (req, res) => {
+  const { productID, Amount, Authority, Status } = req.query;
+  if (Status != 'OK') {
+    throw new BadRequestError('invalid payment, pleas try again');
+  }
+  const product = await Sim.findByPk(productID);
+  const paymentInfo = await verifyPayment(Amount, Authority);
+  if (
+    !paymentInfo.RefID ||
+    (paymentInfo.status < 100 && paymentInfo.status > 101)
+  ) {
+    throw new BadRequestError('invalid payments, pleas try again later');
+  }
+  product.set({ payment: true });
+  product.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: 'payment was successfull, congratulation!' });
+};
+
 module.exports = {
   addSim,
   getAllSims,
@@ -192,4 +221,5 @@ module.exports = {
   getAllUserSims,
   updateSim,
   deleteSim,
+  payment,
 };

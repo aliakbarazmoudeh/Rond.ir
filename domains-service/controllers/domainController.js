@@ -7,6 +7,8 @@ const {
 const { Op } = require('sequelize');
 const Domain = require('../models/Domain');
 const User = require('../models/User');
+const createPayment = require('../commen/zarinpal/createPayment');
+const verifyPayment = require('../commen/zarinpal/verifyPayment');
 
 const addDomain = async (req, res) => {
   const owner = req.user;
@@ -36,21 +38,25 @@ const addDomain = async (req, res) => {
     termOfSale,
     phone,
     description,
+    payment: false,
     owner,
   });
 
-  const user = await User.findByPk(owner);
-  if (user.dataValues.productCount === 0) {
-    throw new BadRequestError('User cant add sim card, has to buy premium');
-  }
-  user.set({ productCount: user.dataValues.productCount - 1 });
-  await user.save();
-
-  res.status(StatusCodes.CREATED).json({
-    userDomain,
-    status: StatusCodes.CREATED,
-    msg: owner,
-  });
+  let amount;
+  userDomain.dataValues.plan === 1 ? (amount = 49000) : null;
+  userDomain.dataValues.plan === 3 ? (amount = 89000) : null;
+  userDomain.dataValues.plan === 5 ? (amount = 109000) : null;
+  const payment = await createPayment(
+    amount,
+    owner,
+    `http://localhost:${
+      process.env.PORT || 5002
+    }/api/domain/payments?productID=${
+      userDomain.dataValues.domain
+    }&Amount=${amount}`
+  );
+  console.log(payment);
+  res.status(StatusCodes.CREATED).redirect(payment.url);
 };
 
 const getAllDomains = async (req, res) => {
@@ -171,6 +177,28 @@ const deleteDomain = async (req, res) => {
     .json({ status: StatusCodes.OK, msg: 'domain destroyed successfully' });
 };
 
+const payment = async (req, res) => {
+  const { productID, Amount, Authority, Status } = req.query;
+  const product = await Domain.findOne({ where: { domain: productID } });
+  if (Status != 'OK') {
+    await product.destroy();
+    throw new BadRequestError('invalid payment, pleas try again');
+  }
+  const paymentInfo = await verifyPayment(Amount, Authority);
+  if (
+    !paymentInfo.RefID ||
+    (paymentInfo.status < 100 && paymentInfo.status > 101)
+  ) {
+    await product.destroy();
+    throw new BadRequestError('invalid payments, pleas try again later');
+  }
+  product.set({ payment: true });
+  product.save();
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: 'payment was successfull, congratulation!' });
+};
+
 module.exports = {
   addDomain,
   deleteDomain,
@@ -179,4 +207,5 @@ module.exports = {
   getAllUserDomains,
   getSingleDomain,
   updateDomain,
+  payment,
 };

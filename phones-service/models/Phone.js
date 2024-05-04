@@ -59,6 +59,11 @@ const Phone = sequelize.define(
       allowNull: false,
       values: [1, 3, 5],
     },
+    payment: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     discription: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -71,7 +76,10 @@ const Phone = sequelize.define(
   {
     updatedAt: true,
     createdAt: true,
-    indexes: [{ unique: true, fields: ['number', 'areaCode'] }],
+    indexes: [
+      { unique: true, fields: ['number', 'areaCode'] },
+      { fields: ['payment'] },
+    ],
   }
 );
 

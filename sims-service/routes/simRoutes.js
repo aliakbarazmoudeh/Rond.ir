@@ -8,6 +8,7 @@ const {
   getSingleSim,
   getAllSimsFromUnkUser,
   getAllUserSims,
+  payment,
 } = require('../controllers/simController');
 const { authenticateUser } = require('../middleware/authentication');
 
@@ -19,6 +20,7 @@ router
   .delete(authenticateUser, deleteSim);
 router.route('/api/userSims').get(authenticateUser, getAllUserSims);
 router.route('/api/unkUserSims').post(getAllSimsFromUnkUser);
+router.use('/api/sim/payments', payment);
 
 router.route('/api/sim/:phoneNumber').get(getSingleSim);
 

@@ -8,6 +8,7 @@ const {
   getAllUserDomains,
   getSingleDomain,
   updateDomain,
+  payment,
 } = require('../controllers/domainController');
 const { authenticateUser } = require('../middleware/authentication');
 
@@ -19,6 +20,7 @@ router
   .delete(authenticateUser, deleteDomain);
 router.route('/api/userDomains').get(authenticateUser, getAllUserDomains);
 router.route('/api/unkUserDomains').post(getAllDomainsFromUnkUser);
+router.use('/api/domain/payments', payment);
 
 router.route('/api/domain/:domain').get(getSingleDomain);
 

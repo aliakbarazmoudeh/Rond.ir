@@ -78,6 +78,11 @@ const Sim = sequelize.define(
         notEmpty: { msg: 'pleas provide a valid province' },
       },
     },
+    payment: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     discription: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -87,7 +92,7 @@ const Sim = sequelize.define(
       defaultValue: 'فاقد توضیحات',
     },
   },
-  { updatedAt: true, createdAt: true }
+  { updatedAt: true, createdAt: true, indexes: [{ fields: ['payment'] }] }
 );
 
 module.exports = Sim;
