@@ -30,7 +30,8 @@
     "sequelize": "^6.37.2",
     "swagger-ui-express": "^5.0.0",
     "xss-clean": "^0.1.1",
-    "yamljs": "^0.3.0"
+    "yamljs": "^0.3.0",
+    "zarinpal-checkout": "^0.2.8"
   },
   "devDependencies": {
     "nodemon": "^2.0.9"
