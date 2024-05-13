@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
 
 const Phone = sequelize.define(
-  'Phone',
+  "Phone",
   {
     _id: {
       type: DataTypes.INTEGER,
@@ -22,7 +22,7 @@ const Phone = sequelize.define(
     phoneType: {
       type: DataTypes.STRING,
       allowNull: false,
-      values: ['هشت رقمی', 'پنج رقمی', 'چهار رقمی', 'اینترنتی'],
+      values: ["هشت رقمی", "پنج رقمی", "چهار رقمی", "اینترنتی"],
     },
     price: {
       type: DataTypes.INTEGER,
@@ -30,7 +30,7 @@ const Phone = sequelize.define(
     },
     usage: {
       type: DataTypes.STRING,
-      values: ['مسکونی', 'اداری', 'تجاری'],
+      values: ["مسکونی", "اداری", "تجاری"],
       allowNull: true,
     },
     status: {
@@ -45,8 +45,8 @@ const Phone = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        min: { args: 1, msg: 'rond type must be at least 1' },
-        max: { args: 40, msg: 'ront type must be at most 40' },
+        min: { args: 1, msg: "rond type must be at least 1" },
+        max: { args: 40, msg: "rond type must be at most 40" },
       },
     },
     termsOfSale: {
@@ -57,30 +57,37 @@ const Phone = sequelize.define(
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      values: [1, 3, 5],
+      values: [0, 1, 3, 5],
     },
     payment: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
     },
-    discription: {
+    expireAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        isDate: { msg: "pleas provide a valid date for expiration" },
+      },
+    },
+    description: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas provide a valid discription' },
+        notEmpty: { msg: "pleas provide a valid description" },
       },
-      defaultValue: 'فاقد توضیحات',
+      defaultValue: "فاقد توضیحات",
     },
   },
   {
     updatedAt: true,
     createdAt: true,
     indexes: [
-      { unique: true, fields: ['number', 'areaCode'] },
-      { fields: ['payment'] },
+      { unique: true, fields: ["number", "areaCode"] },
+      { fields: ["payment"] },
     ],
-  }
+  },
 );
 
 module.exports = Phone;

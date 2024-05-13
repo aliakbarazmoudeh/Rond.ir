@@ -1,12 +1,12 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
 const domainRegex =
   /^(((?!-))(xn--|_)?[a-z0-9-]{0,61}[a-z0-9]{1,1}\.)*(xn--)?([a-z0-9][a-z0-9\-]{0,60}|[a-z0-9-]{1,30}\.[a-z]{2,})$/;
 const phoneRegex =
   /(0|\+98)?([ ]|-|[()]){0,2}9[1|2|3|4]([ ]|-|[()]){0,2}(?:[0-9]([ ]|-|[()]){0,2}){8}/gi;
 
 const Domain = sequelize.define(
-  'Domain',
+  "Domain",
   {
     domain: {
       type: DataTypes.STRING,
@@ -16,7 +16,7 @@ const Domain = sequelize.define(
       validate: {
         is: {
           args: domainRegex,
-          msg: 'pleas provide a valid domain',
+          msg: "pleas provide a valid domain",
         },
         notEmpty: true,
       },
@@ -26,7 +26,7 @@ const Domain = sequelize.define(
       allowNull: false,
       validate: {
         notEmpty: {
-          msg: 'pleas provide a valid string for domain',
+          msg: "pleas provide a valid string for domain",
         },
       },
     },
@@ -39,7 +39,7 @@ const Domain = sequelize.define(
       allowNull: false,
       validate: {
         notEmpty: {
-          msg: 'pleas provide a valid category',
+          msg: "pleas provide a valid category",
         },
       },
     },
@@ -52,31 +52,38 @@ const Domain = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas provide a valid phone number for your domain' },
-        isInt: { msg: 'pleas provide a valid phone number for your domain' },
+        notEmpty: { msg: "pleas provide a valid phone number for your domain" },
+        isInt: { msg: "pleas provide a valid phone number for your domain" },
         is: {
           args: phoneRegex,
-          msg: 'pleas provide a valid phone number for your domain',
+          msg: "pleas provide a valid phone number for your domain",
         },
       },
     },
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      values: [1, 3, 5],
-      defaultValue: 1,
+      values: [0, 1, 3, 5],
+      defaultValue: 1, //TODO change defaultValue of Models
     },
     payment: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
     },
+    expireAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        isDate: { msg: "pleas provide a valid date for expiration" },
+      },
+    },
     description: {
       type: DataTypes.STRING,
-      defaultValue: 'فاقد توضیحات',
+      defaultValue: "فاقد توضیحات",
     },
   },
-  { updatedAt: true, createdAt: true, indexes: [{ fields: ['payment'] }] }
+  { updatedAt: true, createdAt: true, indexes: [{ fields: ["payment"] }] },
 );
 
 module.exports = Domain;

@@ -1,10 +1,10 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
-const reqularExpressionPhone =
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
+const regularExpressionPhone =
   /(0|\+98)?([ ]|-|[()]){0,2}9[1|2|3|4]([ ]|-|[()]){0,2}(?:[0-9]([ ]|-|[()]){0,2}){8}/gi;
 
 const Sim = sequelize.define(
-  'Sim',
+  "Sim",
   {
     phoneNumber: {
       type: DataTypes.STRING,
@@ -13,8 +13,8 @@ const Sim = sequelize.define(
       primaryKey: true,
       validate: {
         is: {
-          args: reqularExpressionPhone,
-          msg: 'pleas provide a valid phone number',
+          args: regularExpressionPhone,
+          msg: "pleas provide a valid phone number",
         },
       },
     },
@@ -22,9 +22,9 @@ const Sim = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas enter a valid operator' },
+        notEmpty: { msg: "pleas enter a valid operator" },
       },
-      values: ['MCI', 'MTN'],
+      values: ["MCI", "MTN"],
     },
     price: {
       type: DataTypes.INTEGER,
@@ -62,20 +62,20 @@ const Sim = sequelize.define(
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      values: [1, 3, 5],
+      values: [0, 1, 3, 5],
     },
     province: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas provide a valid province' },
+        notEmpty: { msg: "pleas provide a valid province" },
       },
     },
     city: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas provide a valid province' },
+        notEmpty: { msg: "pleas provide a valid province" },
       },
     },
     payment: {
@@ -83,16 +83,23 @@ const Sim = sequelize.define(
       allowNull: false,
       defaultValue: false,
     },
-    discription: {
+    expireAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      validate: {
+        isDate: { msg: "pleas provide a valid date for expiration" },
+      },
+    },
+    description: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: { msg: 'pleas provide a valid discription' },
+        notEmpty: { msg: "pleas provide a valid description" },
       },
-      defaultValue: 'فاقد توضیحات',
+      defaultValue: "فاقد توضیحات",
     },
   },
-  { updatedAt: true, createdAt: true, indexes: [{ fields: ['payment'] }] }
+  { updatedAt: true, createdAt: true, indexes: [{ fields: ["payment"] }] },
 );
 
 module.exports = Sim;

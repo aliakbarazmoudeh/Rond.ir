@@ -7,6 +7,8 @@ const {
 const Save = require('../models/Save');
 const User = require('../models/User');
 
+// have checked order array
+
 const addSaveMessage = async (req, res) => {
   const owner = req.user;
   const { title, plan, termOfSale, service, price } = req.body;
@@ -27,7 +29,7 @@ const addSaveMessage = async (req, res) => {
   res.status(StatusCodes.CREATED).json({
     save,
     status: StatusCodes.CREATED,
-    msg: 'added to save message susccessfully',
+    msg: 'added to save message successfully',
   });
 };
 
@@ -36,9 +38,9 @@ const getAllUserSaveMessage = async (req, res) => {
     include: [{ model: Save, order: ['createdAt', 'desc'] }],
   });
   if (!user) {
-    throw new NotFoundError('cant find any data with this informations');
+    throw new NotFoundError("cant find any data with this information's");
   }
-  res.status(StatusCodes.OK).json({ bookMarks: user.dataValues.Saves });
+  res.status(StatusCodes.OK).json({ user });
 };
 
 const deleteSaveMessage = async (req, res) => {
@@ -47,7 +49,7 @@ const deleteSaveMessage = async (req, res) => {
   if (!save) {
     throw new NotFoundError('cant find any domain with this credentials');
   }
-  if (save.dataValues.owner != owner) {
+  if (save.dataValues.owner !== owner) {
     throw new UnauthorizedError('invalid credentials');
   }
   await save.destroy();

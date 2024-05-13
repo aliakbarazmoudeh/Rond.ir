@@ -2,7 +2,6 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { Op } = require('sequelize');
 const Phone = require('../models/Phone');
-const Iran = require('../commen/utils/iran');
 const User = require('../models/User');
 const createPayment = require('../commen/zarinpal/createPayment');
 const verifyPayment = require('../commen/zarinpal/verifyPayment');
@@ -19,9 +18,9 @@ const addPhone = async (req, res) => {
     rondType,
     termsOfSale,
     plan,
-    discription,
+    description,
   } = req.body;
-
+  price = parseInt(price)
   if (price < 10000 && price >= 3)
     throw new BadRequestError('pleas enter a valid price');
 
@@ -41,37 +40,36 @@ const addPhone = async (req, res) => {
     areaCode,
     phoneType,
     price,
-    phoneType,
-    price,
     usage,
     status,
     rondType,
     termsOfSale,
     plan,
-    discription,
-    payment: false,
+    description,
+    expireAt:Date.now() + 864000000,
+    payment: plan === 0,
   });
-  let amount;
-  phone.dataValues.plan === 1 ? (amount = 49000) : null;
-  phone.dataValues.plan === 3 ? (amount = 89000) : null;
-  phone.dataValues.plan === 5 ? (amount = 109000) : null;
-  const payment = await createPayment(
-    amount,
-    owner,
-    `http://localhost:${
-      process.env.PORT || 5003
-    }/api/phone/payments?productID=${phone.dataValues._id}&Amount=${amount}`
-  );
-  console.log(payment);
-  res.status(StatusCodes.CREATED).redirect(payment.url);
+  if(plan!==0){
+    let amount;
+    phone.dataValues.plan === 1 ? (amount = 49000) : null;
+    phone.dataValues.plan === 3 ? (amount = 89000) : null;
+    phone.dataValues.plan === 5 ? (amount = 109000) : null;
+    const payment = await createPayment(
+        amount,
+        owner,
+        `http://localhost:${
+            process.env.PORT || 5003
+        }/api/phone/payments?productID=${phone.dataValues._id}&Amount=${amount}`
+    );
+    console.log(payment);
+    res.status(StatusCodes.CREATED).redirect(payment.url);
+  }
+  res.status(StatusCodes.CREATED).json({status:StatusCodes.CREATED,msg:"phone created successfully, congratulation !"})
 };
 
 const getAllPhones = async (req, res) => {
   let where = {};
-  let orderArray = [
-    ['plan', 'desc'],
-    ['updatedAt', 'desc'],
-  ];
+  
   req.query.number
     ? (where.number = { [Op.like]: `%${req.query.number}%` })
     : null;
@@ -93,14 +91,20 @@ const getAllPhones = async (req, res) => {
   req.query.termsOfSale
     ? (where.termsOfSale = req.query.termsOfSale.split(','))
     : null;
+  // initialize ordering for default mode
+  let orderArray = [
+    ['plan', 'desc'],
+    ['updatedAt', 'desc'],
+  ];
   if (req.query.sort) {
-    let temp = orderArray[0];
-    let temp2 = orderArray[1];
-    orderArray[0] = req.query.sort.split(',');
-    orderArray[1] = temp;
-    orderArray[2] = temp2;
+    let orderByPlan = orderArray[0];
+    let orderByCreatedTime = orderArray[1];
+    // swapping orders by their priority
+    orderArray[0] = req.query.sort.split(','); // example : http://localhost:5000/phone?sort=price,desc
+    orderArray[1] = orderByPlan;
+    orderArray[2] = orderByCreatedTime;
   }
-  const phones = await Phone.findAll({
+  const phones = await Phone.findAndCountAll({
     where: where,
     include: [
       {
@@ -123,7 +127,7 @@ const getAllPhones = async (req, res) => {
 const getSinglePhone = async (req, res) => {
   const id = req.params.id;
   const phone = await Phone.findByPk(id, {
-    include: [{ model: User }],
+    include: [{ model: User ,attributes:['phoneNumber','telephoneNumber','firstName','lastName','address']}],
   });
   if (!phone) {
     throw new NotFoundError('cant find any phone with this id');
@@ -136,6 +140,7 @@ const getAllPhonesFromUnkUser = async (req, res) => {
   const user = await User.findByPk(owner, {
     include: {
       model: Phone,
+      // TODO [] - check order for get all product's for other services
       order: [
         ['plan', 'desc'],
         ['updatedAt', 'desc'],
@@ -145,7 +150,7 @@ const getAllPhonesFromUnkUser = async (req, res) => {
     },
   });
   if (!user)
-    throw new NotFoundError('cant find any data with this informations');
+    throw new NotFoundError("cant find any data with this information's");
   res.status(StatusCodes.OK).json({ user });
 };
 
@@ -162,7 +167,7 @@ const getAllUserPhones = async (req, res) => {
     },
   });
   if (!user)
-    throw new NotFoundError('cant find any data with this informations');
+    throw new NotFoundError("cant find any data with this information's");
   res.status(StatusCodes.OK).json({ user });
 };
 
@@ -175,7 +180,7 @@ const updatePhone = async (req, res) => {
     },
   });
   if (!phone) {
-    throw new NotFoundError('cant find any phone with this informations');
+    throw new NotFoundError("cant find any phone with this information's");
   }
   phone.set(req.body);
   await phone.save({
@@ -189,7 +194,7 @@ const updatePhone = async (req, res) => {
       'rondType',
       'termsOfSale',
       'plan',
-      'discription',
+      'description',
     ],
   });
   res.status(StatusCodes.OK).json({ msg: 'phone updated successfully' });
@@ -204,7 +209,7 @@ const deletePhone = async (req, res) => {
     },
   });
   if (!phone) {
-    throw new NotFoundError('cant find any phone with this informations');
+    throw new NotFoundError("cant find any phone with this information's");
   }
   await phone.destroy();
   res.status(StatusCodes.OK).json({ msg: 'deleting phone number', phone });
@@ -213,7 +218,7 @@ const deletePhone = async (req, res) => {
 const payment = async (req, res) => {
   const { productID, Amount, Authority, Status } = req.query;
   const product = await Phone.findByPk(productID);
-  if (Status != 'OK') {
+  if (Status !== 'OK') {
     await product.destroy();
     throw new BadRequestError('invalid payment, pleas try again');
   }
@@ -226,10 +231,10 @@ const payment = async (req, res) => {
     throw new BadRequestError('invalid payments, pleas try again later');
   }
   product.set({ payment: true });
-  product.save();
+  await product.save();
   res
     .status(StatusCodes.OK)
-    .json({ msg: 'payment was successfull, congratulation!' });
+    .json({ msg: 'payment was successfully, congratulation!' });
 };
 
 module.exports = {

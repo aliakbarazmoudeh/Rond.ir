@@ -1,41 +1,45 @@
-require('dotenv').config();
-require('express-async-errors');
+require("dotenv").config();
+require("express-async-errors");
 
 // express
 
-const express = require('express');
+const express = require("express");
 const app = express();
 // rest of the packages
-const cookieParser = require('cookie-parser');
-const rateLimiter = require('express-rate-limit');
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const cors = require('cors');
+const cookieParser = require("cookie-parser");
+const rateLimiter = require("express-rate-limit");
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const cors = require("cors");
 
 // database
-const connectDB = require('./db/connect');
+const connectDB = require("./db/connect");
+const removeOldProduct = require("./commen/utils/removeOldRecords").query(
+  "phones",
+  "expireAt",
+);
 
 // rabbit mq
 const {
   consumeUserDeleteDirectMessage,
   consumeUserRegisterDirectMessage,
   consumeUserUpdateDirectMessage,
-} = require('./queues/consumer');
+} = require("./queues/consumer");
 
 //  routers
-const phoneRouter = require('./routes/phoneRoutes');
+const phoneRouter = require("./routes/phoneRoutes");
 
 // middleware
-const notFoundMiddleware = require('./middleware/not-found');
-const errorHandlerMiddleware = require('./middleware/error-handler');
+const notFoundMiddleware = require("./middleware/not-found");
+const errorHandlerMiddleware = require("./middleware/error-handler");
 
-// app.set('trust proxy', 1);
-// app.use(
-//   rateLimiter({
-//     windowMs: 15 * 60 * 1000,
-//     max: 60,
-//   })
-// );
+app.set("trust proxy", 1);
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 60,
+  }),
+);
 app.use(helmet());
 app.use(cors());
 app.use(xss());
@@ -58,12 +62,13 @@ const start = async () => {
   try {
     // { alter: true }
     await connectDB.sync({ alter: true, logging: false });
+    await connectDB.query(removeOldProduct);
     await consumeUserRegisterDirectMessage();
     await consumeUserDeleteDirectMessage();
     await consumeUserUpdateDirectMessage();
-    console.log('connected to db');
+    console.log("connected to db");
     app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`)
+      console.log(`Server is listening on port ${port}...`),
     );
   } catch (error) {
     console.log(error);

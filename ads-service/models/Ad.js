@@ -1,8 +1,8 @@
-const sequelize = require('../db/connect');
-const { DataTypes } = require('sequelize');
+const sequelize = require("../db/connect");
+const { DataTypes } = require("sequelize");
 
 const Ad = sequelize.define(
-  'Ad',
+  "Ad",
   {
     _id: {
       type: DataTypes.INTEGER,
@@ -15,29 +15,43 @@ const Ad = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isInt: { msg: 'pleas provide a valid phone number for owner fields' },
+        isInt: { msg: "pleas provide a valid phone number for owner fields" },
       },
     },
     src: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: { notEmpty: { msg: 'pleas provide a valid url' } },
+      validate: { notEmpty: { msg: "pleas provide a valid url" } },
     },
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1,
-      values: [1, 3, 5],
+      values: [0, 1, 3, 5],
+    },
+    submitted: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    payment: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     expireAt: {
       type: DataTypes.DATE,
       allowNull: false,
       validate: {
-        isDate: { msg: 'pleas provide a valid date for expiration' },
+        isDate: { msg: "pleas provide a valid date for expiration" },
       },
     },
   },
-  { createdAt: false, updatedAt: true }
+  {
+    createdAt: true,
+    updatedAt: false,
+    indexes: [{ fields: ["_id", "payment", "submitted"] }],
+  },
 );
 
 module.exports = Ad;
