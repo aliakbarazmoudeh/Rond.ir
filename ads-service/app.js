@@ -53,7 +53,7 @@ app.use(adsRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 5003;
+const port = process.env.PORT || 5004;
 
 const start = async () => {
   try {

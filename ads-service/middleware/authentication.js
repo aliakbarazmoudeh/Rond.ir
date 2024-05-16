@@ -2,11 +2,13 @@ const CustomError = require("../errors");
 
 const authenticateUser = async (req, res, next) => {
   const token = req.signedCookies.token;
-  if (!token) {
+  const role = req.signedCookies.role;
+  if (!token || !role) {
     throw new CustomError.UnauthenticatedError("Authentication Invalid");
   }
   try {
     req.user = token;
+    req.role = role;
     next();
   } catch (error) {
     throw new CustomError.UnauthenticatedError("Authentication Invalid");
@@ -15,8 +17,7 @@ const authenticateUser = async (req, res, next) => {
 
 const authorizePermissions = (...roles) => {
   return (req, res, next) => {
-    console.log(req.user);
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.role)) {
       throw new CustomError.UnauthorizedError(
         "Unauthorized to access this route",
       );

@@ -6,7 +6,6 @@ const createPayment = require("../commen/zarinpal/createPayment");
 const verifyPayment = require("../commen/zarinpal/verifyPayment");
 
 const getAllAds = async (req, res) => {
-  console.log(req.ip);
   const ads = await Ad.findAll({
     where: { payment: true, submitted: true },
     order: [
