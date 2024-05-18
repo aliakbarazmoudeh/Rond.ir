@@ -1,4 +1,5 @@
 const Ad = require("../models/Ad");
+const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const path = require("path");
 const { BadRequestError, NotFoundError } = require("../errors");

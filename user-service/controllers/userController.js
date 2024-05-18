@@ -49,7 +49,7 @@ const createUser = async (req, res) => {
     throw new BadRequestError("'invalid information's for creating account");
   }
   // searching in both tables (legal users & normal users)
-  let isUserExist = await User.findByPk(parseInt(phoneNumber));
+  let isUserExist = await User.findOne({ where: { phoneNumber } });
   if (isUserExist) {
     throw new BadRequestError("user already exist");
   }
@@ -107,7 +107,6 @@ const createUser = async (req, res) => {
     })
     .status(StatusCodes.CREATED)
     .json({
-      user,
       status: StatusCodes.CREATED,
       msg: "user created successfully",
     });
@@ -153,7 +152,7 @@ const createAdmin = async (req, res) => {
 
 const login = async (req, res) => {
   const { phoneNumber, password } = req.body;
-  let user = await User.findByPk(phoneNumber);
+  let user = await User.findOne({ where: { phoneNumber } });
   if (!user) {
     throw new NotFoundError("cant find any user with this phone number");
   }
@@ -162,17 +161,13 @@ const login = async (req, res) => {
     throw new UnauthorizedError("password does not matched");
   }
   res
-    .cookie(
-      "token",
-      { phoneNumber: user.dataValues.id, role: "user" },
-      {
-        httpOnly: true,
-        secure: true,
-        expires: new Date(Date.now() + 100000000),
-        maxAge: new Date(Date.now() + 100000000),
-        signed: true,
-      },
-    )
+    .cookie("token", user.dataValues.id, {
+      httpOnly: true,
+      secure: true,
+      expires: new Date(Date.now() + 100000000),
+      maxAge: new Date(Date.now() + 100000000),
+      signed: true,
+    })
     .cookie("role", user.dataValues.role, {
       httpOnly: true,
       secure: true,
@@ -227,25 +222,30 @@ const updateUser = async (req, res) => {
   if (!user) {
     throw new NotFoundError("cant find any user with this information's");
   }
+  req.body.id ? delete req.body.id : null;
+  req.body.userType ? delete req.body.userType : null;
+  req.body.productCount ? delete req.body.productCount : null;
   let data = req.body;
-  data.phoneNumber = req.user;
+  data.id = req.user;
   await publishDirectMessage("User", "update", data);
+  user.set(req.body);
   await user.save();
   res.status(StatusCodes.OK).json({ user });
 };
 
 const deleteUser = async (req, res) => {
-  let user = await User.findOne({ where: { phoneNumber: req.user } });
+  let user = await User.findByPk(req.user);
   if (!user) {
-    user = await LegalUser.findOne({ where: { phoneNumber: req.user } });
-    if (!user) {
-      throw new NotFoundError("cant find any user with this phone number");
-    }
+    throw new NotFoundError("cant find any user with this phone number");
   }
-  await publishDirectMessage("User", "delete", { phoneNumber: req.user });
+  await publishDirectMessage("User", "delete", { id: req.user });
   await user.destroy();
   res
     .cookie("token", "logout", {
+      httpOnly: true,
+      expires: new Date(Date.now() + 1),
+    })
+    .cookie("role", "logout", {
       httpOnly: true,
       expires: new Date(Date.now() + 1),
     })

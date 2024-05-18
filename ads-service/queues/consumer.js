@@ -6,22 +6,15 @@ const createUser = async (data) => {
 };
 
 const deleteUser = async (data) => {
-  const user = await User.findByPk(data.id);
+  const user = await User.findByPk(parseInt(data.id));
   await user.destroy();
 };
 
 const updateUser = async (data) => {
-  const user = await User.findByPk(data.id);
+  const user = await User.findByPk(parseInt(data.id));
   user.set(data);
-  await user.save({
-    fields: [
-      "phoneNumber",
-      "address",
-      "productCount",
-      "telephoneNumber",
-      "userLevel",
-    ],
-  });
+  delete data.id;
+  await user.save();
 };
 
 const consumeUserRegisterDirectMessage = async (channel) => {
@@ -97,7 +90,7 @@ const consumeUserUpdateDirectMessage = async (channel) => {
     channel.consume(CustomerQueue.queue, async (msg) => {
       // data is object
       const data = JSON.parse(msg.content.toString());
-      await updateUser(data);
+      // await updateUser(data);
       channel.ack(msg);
     });
   } catch (error) {

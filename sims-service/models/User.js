@@ -1,22 +1,24 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
-const Sim = require('./Sim');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
+const Sim = require("./Sim");
 
 const User = sequelize.define(
-  'User',
+  "User",
   {
-    phoneNumber: {
-      type: DataTypes.STRING,
-      unique: true,
+    id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+    },
+    phoneNumber: {
+      type: DataTypes.STRING,
     },
     address: {
       type: DataTypes.STRING,
       allowNull: true,
       validate: {
         notEmpty: {
-          msg: 'pleas provide a valid address',
+          msg: "pleas provide a valid address",
         },
       },
     },
@@ -39,29 +41,34 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    userLevel: {
-      type: DataTypes.INTEGER,
+    userType: {
+      type: DataTypes.STRING,
       allowNull: false,
+      values: ["Customer", "Legal", "Admin", "Owner"],
     },
     productCount: {
       type: DataTypes.INTEGER,
-      defaultValue: 2,
+      defaultValue: 10,
       allowNull: false,
     },
   },
-  { createdAt: false, updatedAt: false }
+  {
+    createdAt: false,
+    updatedAt: false,
+    indexes: [{ unique: true, fields: ["id"] }],
+  },
 );
 
 User.hasMany(Sim, {
-  foreignKey: 'owner',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
+  foreignKey: "owner",
+  onDelete: "cascade",
+  onUpdate: "cascade",
   hooks: true,
 });
 Sim.belongsTo(User, {
-  foreignKey: 'owner',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
+  foreignKey: "owner",
+  onDelete: "cascade",
+  onUpdate: "cascade",
 });
 
 module.exports = User;

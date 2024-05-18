@@ -1,30 +1,20 @@
-const { createConnection } = require('./connection');
-const User = require('../models/User');
+const { createConnection } = require("./connection");
+const User = require("../models/User");
 
 const createUser = async (data) => {
   const user = User.create(data);
-  return;
 };
 
 const deleteUser = async (data) => {
-  const user = await User.findOne({ where: { phoneNumber: data.phoneNumber } });
+  const user = await User.findByPk(parseInt(data.id));
   await user.destroy();
-  return;
 };
 
 const updateUser = async (data) => {
-  const user = await User.findOne({ where: { phoneNumber: data.phoneNumber } });
+  const user = await User.findByPk(parseInt(data.id));
   user.set(data);
-  await user.save({
-    fields: [
-      'phoneNumber',
-      'address',
-      'productCount',
-      'telephoneNumber',
-      'userLevel',
-    ],
-  });
-  return;
+  delete data.id;
+  await user.save();
 };
 
 const consumeUserRegisterDirectMessage = async (channel) => {
@@ -32,10 +22,10 @@ const consumeUserRegisterDirectMessage = async (channel) => {
     if (!channel) {
       channel = await createConnection();
     }
-    const exchangeName = 'User';
-    const routingKey = 'register';
-    const queueName = 'UserRegisterPhoneQueue';
-    await channel.assertExchange(exchangeName, 'direct');
+    const exchangeName = "User";
+    const routingKey = "register";
+    const queueName = "UserRegisterPhoneQueue";
+    await channel.assertExchange(exchangeName, "direct");
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
       autoDelete: false,
@@ -49,8 +39,8 @@ const consumeUserRegisterDirectMessage = async (channel) => {
     });
   } catch (error) {
     console.log(
-      'error',
-      'PhoneService PhoneConsumer consumeUserRegisterDirectMessage method error'
+      "error",
+      "PhoneService PhoneConsumer consumeUserRegisterDirectMessage method error",
     );
   }
 };
@@ -60,10 +50,10 @@ const consumeUserDeleteDirectMessage = async (channel) => {
     if (!channel) {
       channel = await createConnection();
     }
-    const exchangeName = 'User';
-    const routingKey = 'delete';
-    const queueName = 'UserDeletePhoneQueue';
-    await channel.assertExchange(exchangeName, 'direct');
+    const exchangeName = "User";
+    const routingKey = "delete";
+    const queueName = "UserDeletePhoneQueue";
+    await channel.assertExchange(exchangeName, "direct");
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
       autoDelete: false,
@@ -77,8 +67,8 @@ const consumeUserDeleteDirectMessage = async (channel) => {
     });
   } catch (error) {
     console.log(
-      'error',
-      'PhoneService PhoneConsumer consumeUserDeleteDirectMessage() method error'
+      "error",
+      "PhoneService PhoneConsumer consumeUserDeleteDirectMessage() method error",
     );
   }
 };
@@ -88,10 +78,10 @@ const consumeUserUpdateDirectMessage = async (channel) => {
     if (!channel) {
       channel = await createConnection();
     }
-    const exchangeName = 'User';
-    const routingKey = 'update';
-    const queueName = 'UserUpdatePhoneQueue';
-    await channel.assertExchange(exchangeName, 'direct');
+    const exchangeName = "User";
+    const routingKey = "update";
+    const queueName = "UserUpdatePhoneQueue";
+    await channel.assertExchange(exchangeName, "direct");
     const CustomerQueue = await channel.assertQueue(queueName, {
       durable: true,
       autoDelete: false,
@@ -105,8 +95,8 @@ const consumeUserUpdateDirectMessage = async (channel) => {
     });
   } catch (error) {
     console.log(
-      'error',
-      'PhoneService PhoneConsumer consumeUserUpdateDirectMessage() method error'
+      "error",
+      "PhoneService PhoneConsumer consumeUserUpdateDirectMessage() method error",
     );
   }
 };

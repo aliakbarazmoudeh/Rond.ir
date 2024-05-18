@@ -1,23 +1,24 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/connect");
 const { hashSync } = require("bcryptjs");
-const reqularExpressionPhone = /09(1[0-9]|3[1-9])[0-9]{7}/gm;
+const regularExpressionPhone = /09(1[0-9]|3[1-9])[0-9]{7}/gm;
 
-const reqularExpressiontele = /0[1-9](1[0-9]|3[1-9])[0-9]{7}/gm;
+const regularExpressionist = /0[1-9](1[0-9]|3[1-9])[0-9]{7}/gm;
 
-const LegalUser = sequelize.define(
+const User = sequelize.define(
   "User",
   {
     id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
     },
     phoneNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       validate: {
         is: {
-          args: reqularExpressionPhone,
+          args: regularExpressionPhone,
           msg: "pleas enter a valid phone number",
         },
       },
@@ -56,7 +57,7 @@ const LegalUser = sequelize.define(
       },
     },
     nationalCode: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
       validate: {
         len: {
@@ -143,13 +144,13 @@ const LegalUser = sequelize.define(
           msg: "pleas provide a valid telephone number",
         },
         is: {
-          args: reqularExpressiontele,
+          args: regularExpressionist,
           msg: "pleas provid a valid telephone number",
         },
       },
     },
     productCount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT,
       defaultValue: 10,
       allowNull: false,
     },
@@ -175,4 +176,4 @@ const LegalUser = sequelize.define(
   },
 );
 
-module.exports = LegalUser;
+module.exports = User;

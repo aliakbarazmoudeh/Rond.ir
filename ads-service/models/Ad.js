@@ -12,7 +12,7 @@ const Ad = sequelize.define(
       unique: true,
     },
     owner: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
         isInt: { msg: "pleas provide a valid phone number for owner fields" },
@@ -50,7 +50,10 @@ const Ad = sequelize.define(
   {
     createdAt: true,
     updatedAt: false,
-    indexes: [{ fields: ["_id", "payment", "submitted"] }],
+    indexes: [
+      { unique: true, fields: ["_id"] },
+      { fields: ["payment", "submitted", "owner"] },
+    ],
   },
 );
 
