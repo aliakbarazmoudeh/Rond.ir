@@ -2,6 +2,7 @@ const Ad = require("../models/Ad");
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const path = require("path");
+const moment = require("moment");
 const { BadRequestError, NotFoundError } = require("../errors");
 const createPayment = require("../commen/zarinpal/createPayment");
 const verifyPayment = require("../commen/zarinpal/verifyPayment");
@@ -19,9 +20,18 @@ const getAllAds = async (req, res) => {
   res.status(StatusCodes.OK).json({ ads });
 };
 
+const getUserAds = async (req, res) => {
+  const userAds = await Ad.findAll({
+    where: { ownerID: req.user },
+    order: [["createdAt", "desc"]],
+  });
+  if (!userAds) throw new NotFoundError("cant find any ads with this data");
+  res.status(StatusCodes.OK).json(userAds);
+};
+
 const getAd = async (req, res) => {
-  const { _id } = req.body;
-  const ad = await Ad.findByPk(_id);
+  const { id } = req.body;
+  const ad = await Ad.findByPk(id);
   if (!ad) {
     throw new NotFoundError("cant find any ads by this information");
   }
@@ -43,11 +53,12 @@ const createAd = async (req, res) => {
   const imagePath = path.join(__dirname, "../../ads/" + `${productImage.name}`);
   // await productImage.mv(imagePath);
   const ad = await Ad.create({
-    owner: req.user.phoneNumber,
+    ownerID: req.user,
     src: `/ads/${productImage.name}`,
     plan: parseInt(req.query.plan),
     expireAt: Date.now() + 259200000,
     payment: req.query.plan === 0,
+    createdAt: parseInt(moment(Date.now()).format("YYYYMMDDHHmmss")),
   });
   if (req.query.plan !== 0) {
     let amount;
@@ -56,8 +67,8 @@ const createAd = async (req, res) => {
     ad.dataValues.plan === 5 ? (amount = 109000) : null;
     const payment = await createPayment(
       amount,
-      ad.dataValues.owner,
-      `http://localhost:${process.env.PORT || 5003}/api/ad/payments?productID=${
+      ad.dataValues.ownerID,
+      `http://localhost:${process.env.PORT || 5004}/api/ad/payments?productID=${
         ad.dataValues._id
       }&Amount=${amount}`,
     );
@@ -95,8 +106,6 @@ const payment = async (req, res) => {
 };
 
 const getAllAdsForAdmins = async (req, res) => {
-  console.log(req.ip);
-  console.log("hello world");
   const ads = await Ad.findAll({
     where: { submitted: false, payment: true },
     order: [["createdAt", "asc"]],
@@ -141,6 +150,7 @@ const adDisagreed = async (req, res) => {
 
 module.exports = {
   getAllAds,
+  getUserAds,
   getAd,
   createAd,
   getAllAdsForAdmins,

@@ -5,13 +5,9 @@ const Phone = require("./Phone");
 const User = sequelize.define(
   "User",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-    },
     phoneNumber: {
       type: DataTypes.BIGINT,
+      primaryKey: true,
       allowNull: false,
     },
     address: {
@@ -57,13 +53,13 @@ const User = sequelize.define(
 );
 
 User.hasMany(Phone, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
   hooks: true,
 });
 Phone.belongsTo(User, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
 });

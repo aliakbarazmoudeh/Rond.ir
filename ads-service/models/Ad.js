@@ -11,8 +11,8 @@ const Ad = sequelize.define(
       primaryKey: true,
       unique: true,
     },
-    owner: {
-      type: DataTypes.INTEGER,
+    ownerID: {
+      type: DataTypes.BIGINT,
       allowNull: false,
       validate: {
         isInt: { msg: "pleas provide a valid phone number for owner fields" },
@@ -26,8 +26,8 @@ const Ad = sequelize.define(
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 1,
       values: [0, 1, 3, 5],
+      defaultValue: 0,
     },
     submitted: {
       type: DataTypes.BOOLEAN,
@@ -46,13 +46,17 @@ const Ad = sequelize.define(
         isDate: { msg: "pleas provide a valid date for expiration" },
       },
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
   {
     createdAt: true,
     updatedAt: false,
     indexes: [
       { unique: true, fields: ["_id"] },
-      { fields: ["payment", "submitted", "owner"] },
+      { fields: ["payment", "submitted", "ownerID", "createdAt", "plan"] },
     ],
   },
 );

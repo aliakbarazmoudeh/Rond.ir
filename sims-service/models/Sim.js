@@ -98,8 +98,12 @@ const Sim = sequelize.define(
       },
       defaultValue: "فاقد توضیحات",
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
-  { updatedAt: true, createdAt: true, indexes: [{ fields: ["payment"] }] },
+  { updatedAt: false, createdAt: true, indexes: [{ fields: ["payment"] }] },
 );
 
 module.exports = Sim;

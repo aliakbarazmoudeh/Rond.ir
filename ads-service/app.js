@@ -3,15 +3,12 @@ require("express-async-errors");
 // express
 const express = require("express");
 const app = express();
-// const IP = require("ip");
-// rest of the packages
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const rateLimiter = require("express-rate-limit");
 const helmet = require("helmet");
 const xss = require("xss-clean");
 const cors = require("cors");
-const morgan = require("morgan");
 
 // database
 const connectDB = require("./db/connect");
@@ -42,7 +39,6 @@ app.use(
 app.use(helmet());
 app.use(cors());
 app.use(xss());
-app.use(morgan("tiny"));
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));

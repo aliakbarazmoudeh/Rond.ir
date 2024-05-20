@@ -7,11 +7,12 @@ const {
 const { Op } = require("sequelize");
 const Domain = require("../models/Domain");
 const User = require("../models/User");
+const moment = require("moment");
 const createPayment = require("../commen/zarinpal/createPayment");
 const verifyPayment = require("../commen/zarinpal/verifyPayment");
 
 const addDomain = async (req, res) => {
-  const owner = req.user;
+  const ownerID = req.user;
   let {
     domain,
     domainInFarsi,
@@ -23,7 +24,7 @@ const addDomain = async (req, res) => {
     description,
   } = req.body;
   price = parseInt(price);
-  const isExist = await Domain.findByPk(domain);
+  const isExist = await Domain.findOne({ where: { domain } });
   if (isExist) {
     throw new BadRequestError("domain already created");
   }
@@ -43,7 +44,8 @@ const addDomain = async (req, res) => {
     plan,
     expireAt: Date.now() + 864000000,
     payment: plan === 0,
-    owner,
+    ownerID,
+    createdAt: parseInt(moment(Date.now()).format("YYYYMMDDHHmmss")),
   });
 
   if (plan !== 0) {
@@ -53,11 +55,11 @@ const addDomain = async (req, res) => {
     userDomain.dataValues.plan === 5 ? (amount = 109000) : null;
     const payment = await createPayment(
       amount,
-      owner,
+      `0${ownerID}`,
       `http://localhost:${
         process.env.PORT || 5002
       }/api/domain/payments?productID=${
-        userDomain.dataValues.domain
+        userDomain.dataValues._id
       }&Amount=${amount}`,
     );
     console.log(payment);
@@ -69,7 +71,9 @@ const addDomain = async (req, res) => {
 };
 
 const getAllDomains = async (req, res) => {
-  let filter = {};
+  let filter = {
+    payment: true,
+  };
   req.query.name
     ? (filter.domain = { [Op.like]: `%${req.query.name}%` })
     : null;
@@ -91,29 +95,14 @@ const getAllDomains = async (req, res) => {
     : null;
   let orderArray = [
     ["plan", "desc"],
-    ["updatedAt", "desc"],
+    ["createdAt", "desc"],
   ];
   if (req.query.sort) {
-    let orderByPlan = orderArray[0];
-    let orderByCreatedTime = orderArray[1];
     // swapping orders by their priority
-    orderArray[0] = req.query.sort.split(","); // example : http://localhost:5000/domain?sort=price,desc
-    orderArray[1] = orderByPlan;
-    orderArray[2] = orderByCreatedTime;
+    orderArray.unshift(req.query.sort.split(",")); // example : http://localhost:5000/domain?sort=price,desc
   }
   const domains = await Domain.findAndCountAll({
     where: filter,
-    include: [
-      {
-        model: User,
-        attributes: [
-          "phoneNumber",
-          "telephoneNumber",
-          "address",
-          "companyName",
-        ],
-      },
-    ],
     order: orderArray,
     limit: parseInt(req.query.limit) || 10,
     offset: parseInt(req.query.offset) || 0,
@@ -122,18 +111,11 @@ const getAllDomains = async (req, res) => {
 };
 
 const getSingleDomain = async (req, res) => {
-  const domain = await Domain.findByPk(req.params.domain, {
+  const domain = await Domain.findByPk(req.params.id, {
     include: [
       {
         model: User,
-        attributes: [
-          "firstName",
-          "lastName",
-          "phoneNumber",
-          "telephoneNumber",
-          "companyName",
-          "address",
-        ],
+        include: [{ model: Domain, order: ["createdAt", "desc"] }],
       },
     ],
   });
@@ -145,9 +127,9 @@ const getSingleDomain = async (req, res) => {
     .json({ status: StatusCodes.OK, msg: "find successfully", domain });
 };
 
-const getAllDomainsFromUnkUser = async (req, res) => {
-  const user = await User.findByPk(req.body.owner, {
-    include: [{ model: Domain }], //grabbing all domain's that user have
+const getAllUserDomains = async (req, res) => {
+  const user = await User.findByPk(req.query.ownerID, {
+    include: [{ model: Domain }], // grabbing all domain's that user have
   });
   if (!user) {
     throw new NotFoundError("cant find any data with this information's");
@@ -159,25 +141,15 @@ const getAllDomainsFromUnkUser = async (req, res) => {
   });
 };
 
-const getAllUserDomains = async (req, res) => {
-  const user = await User.findByPk(req.user, {
-    include: [{ model: Domain }], // grabbing all domain's that user have
-  });
-  if (!user) {
-    throw new NotFoundError("cant find any data with this information's");
-  }
-  res.status(StatusCodes.OK).json({ user });
-};
-
 const updateDomain = async (req, res) => {
   const owner = req.user;
-  const { price, oldDomain } = req.body;
+  const { price } = req.body;
 
   if (price < 10000 && price >= 3) {
     throw new BadRequestError("pleas provide a valid price");
   }
 
-  const userDomain = await Domain.findByPk(oldDomain);
+  const userDomain = await Domain.findByPk(req.params.id);
   if (!userDomain) {
     throw new NotFoundError("cant find any domains");
   }
@@ -202,13 +174,12 @@ const updateDomain = async (req, res) => {
 };
 
 const deleteDomain = async (req, res) => {
-  const owner = req.user;
-  const domain = req.body;
-  const userDomain = await Domain.findByPk(domain);
+  const ownerID = req.user;
+  const userDomain = await Domain.findByPk(req.params.id);
   if (!userDomain) {
     throw new NotFoundError("cant find any domain with this credentials");
   }
-  if (userDomain.dataValues.owner !== owner) {
+  if (userDomain.dataValues.ownerID !== ownerID) {
     throw new UnauthorizedError("invalid credentials");
   }
   await userDomain.destroy();
@@ -242,7 +213,6 @@ const payment = async (req, res) => {
 module.exports = {
   addDomain,
   deleteDomain,
-  getAllDomainsFromUnkUser,
   getAllDomains,
   getAllUserDomains,
   getSingleDomain,

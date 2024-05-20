@@ -8,10 +8,17 @@ const phoneRegex =
 const Domain = sequelize.define(
   "Domain",
   {
+    _id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+    },
+    ownerID: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
     domain: {
       type: DataTypes.STRING,
-      unique: true,
-      primaryKey: true,
       allowNull: false,
       validate: {
         is: {
@@ -64,7 +71,7 @@ const Domain = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       values: [0, 1, 3, 5],
-      defaultValue: 1, //TODO change defaultValue of Models
+      defaultValue: 0,
     },
     payment: {
       type: DataTypes.BOOLEAN,
@@ -82,8 +89,19 @@ const Domain = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: "فاقد توضیحات",
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
-  { updatedAt: true, createdAt: true, indexes: [{ fields: ["payment"] }] },
+  {
+    updatedAt: false,
+    createdAt: true,
+    indexes: [
+      { unique: true, fields: ["_id"] },
+      { fields: ["payment", "createdAt", "plan", "domain", "ownerID"] },
+    ],
+  },
 );
 
 module.exports = Domain;

@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
 
 const Save = sequelize.define(
-  'Save',
+  "Save",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -33,8 +33,12 @@ const Save = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
-  { updatedAt: false, createdAt: true }
+  { updatedAt: false, createdAt: true },
 );
 
 module.exports = Save;

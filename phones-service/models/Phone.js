@@ -6,17 +6,20 @@ const Phone = sequelize.define(
   {
     _id: {
       type: DataTypes.INTEGER,
-      unique: true,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
-    number: {
-      type: DataTypes.INTEGER,
+    ownerID: {
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
-    areaCode: {
-      type: DataTypes.INTEGER,
+    preCode: {
+      type: DataTypes.SMALLINT,
+      allowNull: false,
+    },
+    number: {
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
     phoneType: {
@@ -42,7 +45,7 @@ const Phone = sequelize.define(
       },
     },
     rondType: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT,
       allowNull: false,
       validate: {
         min: { args: 1, msg: "rond type must be at least 1" },
@@ -50,14 +53,15 @@ const Phone = sequelize.define(
       },
     },
     termsOfSale: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT,
       allowNull: false,
       values: [1, 2, 3],
     },
     plan: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.SMALLINT,
       allowNull: false,
       values: [0, 1, 3, 5],
+      defaultValue: 0,
     },
     payment: {
       type: DataTypes.BOOLEAN,
@@ -79,13 +83,18 @@ const Phone = sequelize.define(
       },
       defaultValue: "فاقد توضیحات",
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
   {
-    updatedAt: true,
+    updatedAt: false,
     createdAt: true,
     indexes: [
-      { unique: true, fields: ["number", "areaCode"] },
-      { fields: ["payment"] },
+      { unique: true, fields: ["number", "preCode"] },
+      { unique: true, fields: ["_id"] },
+      { fields: ["payment", "createdAt", "plan"] },
     ],
   },
 );

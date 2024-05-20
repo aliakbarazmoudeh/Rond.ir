@@ -5,14 +5,10 @@ const Ad = require("./Ad");
 const User = sequelize.define(
   "User",
   {
-    id: {
-      type: DataTypes.INTEGER,
+    phoneNumber: {
+      type: DataTypes.BIGINT,
       allowNull: false,
       primaryKey: true,
-    },
-    phoneNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     address: {
       type: DataTypes.STRING,
@@ -55,21 +51,18 @@ const User = sequelize.define(
   {
     createdAt: false,
     updatedAt: false,
-    indexes: [
-      { unique: true, fields: ["id"] },
-      { unique: true, fields: ["phoneNumber"] },
-    ],
+    indexes: [{ unique: true, fields: ["phoneNumber"] }],
   },
 );
 
 User.hasMany(Ad, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
   hooks: true,
 });
 Ad.belongsTo(User, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
 });

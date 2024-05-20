@@ -98,7 +98,7 @@ const createUser = async (req, res) => {
       maxAge: new Date(Date.now() + 100000000),
       signed: true,
     })
-    .cookie("role", user.dataValues.role, {
+    .cookie("role", user.dataValues.userType, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),
@@ -128,18 +128,14 @@ const createAdmin = async (req, res) => {
     userType: "Admin",
   });
   res
-    .cookie(
-      "token",
-      { phoneNumber: admin.dataValues.id, role: "user" },
-      {
-        httpOnly: true,
-        secure: true,
-        expires: new Date(Date.now() + 100000000),
-        maxAge: new Date(Date.now() + 100000000),
-        signed: true,
-      },
-    )
-    .cookie("role", admin.dataValues.role, {
+    .cookie("token", admin.dataValues.id, {
+      httpOnly: true,
+      secure: true,
+      expires: new Date(Date.now() + 100000000),
+      maxAge: new Date(Date.now() + 100000000),
+      signed: true,
+    })
+    .cookie("role", admin.dataValues.userType, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),
@@ -168,7 +164,7 @@ const login = async (req, res) => {
       maxAge: new Date(Date.now() + 100000000),
       signed: true,
     })
-    .cookie("role", user.dataValues.role, {
+    .cookie("role", user.dataValues.userType, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),

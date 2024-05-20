@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../db/connect');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../db/connect");
 
 const Viewed = sequelize.define(
-  'Viewed',
+  "Viewed",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -37,11 +37,15 @@ const Viewed = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
       validate: {
-        isDate: { msg: 'pleas provide a valid date for expiration' },
+        isDate: { msg: "pleas provide a valid date for expiration" },
       },
     },
+    createdAt: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
   },
-  { createdAt: false, updatedAt: false }
+  { createdAt: true, updatedAt: false },
 );
 
 module.exports = Viewed;

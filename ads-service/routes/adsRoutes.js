@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getAllAds,
+  getUserAds,
   createAd,
   getAd,
   payment,
@@ -16,6 +17,8 @@ const { authorizePermissions } = require("../middleware/authentication");
 router.use(authenticateUser);
 
 router.route("/api/ads").get(getAllAds).post(createAd);
+router.route("/api/user-ads").get(getUserAds);
+
 
 // admin panel
 router
@@ -28,6 +31,5 @@ router
   .delete(authorizePermissions("admin"), adDisagreed);
 
 router.use("/api/ad/payments", payment);
-
 router.route("/api/ad/:id").get(getAd);
 module.exports = router;

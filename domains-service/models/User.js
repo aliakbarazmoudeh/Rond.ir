@@ -5,13 +5,9 @@ const Domain = require("./Domain");
 const User = sequelize.define(
   "User",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-    },
     phoneNumber: {
       type: DataTypes.BIGINT,
+      primaryKey: true,
       allowNull: false,
     },
     address: {
@@ -56,18 +52,18 @@ const User = sequelize.define(
   {
     createdAt: false,
     updatedAt: false,
-    indexes: [{ unique: true, fields: ["id"] }],
+    indexes: [{ unique: true, fields: ["phoneNumber"] }],
   },
 );
 
 User.hasMany(Domain, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
   hooks: true,
 });
 Domain.belongsTo(User, {
-  foreignKey: "owner",
+  foreignKey: "ownerID",
   onDelete: "cascade",
   onUpdate: "cascade",
 });

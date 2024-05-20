@@ -4,6 +4,7 @@ const { Op } = require("sequelize");
 const Sim = require("../models/Sim");
 const Iran = require("../commen/utils/iran");
 const User = require("../models/User");
+const moment = require("moment");
 const createPayment = require("../commen/zarinpal/createPayment");
 const verifyPayment = require("../commen/zarinpal/verifyPayment");
 
@@ -62,6 +63,7 @@ const addSim = async (req, res) => {
     expireAt: Date.now() + 864000000,
     description,
     payment: plan === 0, // for free option return true
+    createdAt: parseInt(moment(Date.now()).format("YYYYMMDDHHmmss")),
   });
   if (plan !== 0) {
     let amount;
@@ -85,7 +87,9 @@ const addSim = async (req, res) => {
 };
 
 const getAllSims = async (req, res) => {
-  let where = {};
+  let where = {
+    payment: true,
+  };
   req.query.operator ? (where.operator = req.query.operator.split(",")) : null;
   req.query.areaCode
     ? (where.phoneNumber = { [Op.startsWith]: `%${req.query.areaCode}%` })
@@ -111,15 +115,11 @@ const getAllSims = async (req, res) => {
     : null;
   let orderArray = [
     ["plan", "desc"],
-    ["updatedAt", "desc"],
+    ["createdAt", "desc"],
   ];
   if (req.query.sort) {
-    let orderByPlan = orderArray[0];
-    let orderByCreatedTime = orderArray[1];
     // swapping orders by their priority
-    orderArray[0] = req.query.sort.split(","); // example : http://localhost:5000/sim?sort=price,desc
-    orderArray[1] = orderByPlan;
-    orderArray[2] = orderByCreatedTime;
+    orderArray.unshift(req.query.sort.split(",")); // example : http://localhost:5000/sim?sort=price,desc
   }
   const sims = await Sim.findAndCountAll({
     where: where,
