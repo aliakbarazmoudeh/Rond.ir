@@ -153,7 +153,8 @@ const updateDomain = async (req, res) => {
   if (!userDomain) {
     throw new NotFoundError("cant find any domains");
   }
-  if (userDomain.dataValues.owner !== owner) {
+
+  if (userDomain.dataValues.ownerID != owner) {
     throw new UnauthorizedError("invalid credentials");
   }
   userDomain.set(req.body);

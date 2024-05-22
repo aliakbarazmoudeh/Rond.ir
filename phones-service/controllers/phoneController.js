@@ -138,26 +138,8 @@ const getSinglePhone = async (req, res) => {
   res.status(StatusCodes.OK).json({ phone });
 };
 
-const getAllPhonesFromUnkUser = async (req, res) => {
-  const { owner } = req.body;
-  const user = await User.findByPk(owner, {
-    include: {
-      model: Phone,
-      order: [
-        ["plan", "desc"],
-        ["createdAt", "desc"],
-      ],
-      limit: parseInt(req.query.limit) || 10,
-      offset: parseInt(req.query.offset) || 0,
-    },
-  });
-  if (!user)
-    throw new NotFoundError("cant find any data with this information's");
-  res.status(StatusCodes.OK).json({ user });
-};
-
 const getAllUserPhones = async (req, res) => {
-  const user = await User.findByPk(req.user, {
+  const user = await User.findByPk(req.params.phoneNumber, {
     include: {
       model: Phone,
       order: [
@@ -176,8 +158,7 @@ const getAllUserPhones = async (req, res) => {
 const updatePhone = async (req, res) => {
   const phone = await Phone.findOne({
     where: {
-      number: req.body.number,
-      preCode: req.body.preCode,
+      _id: req.params.id,
       ownerID: req.user,
     },
   });
@@ -205,8 +186,7 @@ const updatePhone = async (req, res) => {
 const deletePhone = async (req, res) => {
   const phone = await Phone.findOne({
     where: {
-      number: req.body.number,
-      preCode: req.body.preCode,
+      _id: req.params.id,
       ownerID: req.user,
     },
   });
@@ -243,7 +223,6 @@ module.exports = {
   addPhone,
   getAllPhones,
   getSinglePhone,
-  getAllPhonesFromUnkUser,
   getAllUserPhones,
   updatePhone,
   deletePhone,

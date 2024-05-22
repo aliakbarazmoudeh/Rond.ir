@@ -1,21 +1,17 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db/connect");
 const { hashSync } = require("bcryptjs");
-const regularExpressionPhone = /09(1[0-9]|3[1-9])[0-9]{7}/gm;
+const regularExpressionPhone = /9(1[0-9]|3[1-9])[0-9]{7}/gm;
 
-const regularExpressionist = /0[1-9](1[0-9]|3[1-9])[0-9]{7}/gm;
+const regularExpressionist = /[1-9](1[0-9]|3[1-9])[0-9]{7}/gm;
 
 const User = sequelize.define(
   "User",
   {
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-    },
     phoneNumber: {
       type: DataTypes.BIGINT,
+      primaryKey: true,
+      allowNull: false,
       validate: {
         is: {
           args: regularExpressionPhone,
@@ -57,15 +53,8 @@ const User = sequelize.define(
       },
     },
     nationalCode: {
-      type: DataTypes.STRING,
+      type: DataTypes.BIGINT,
       allowNull: true,
-      validate: {
-        len: {
-          args: [10, 10],
-          msg: "length of national code must be 10",
-        },
-        isInt: { msg: "pleas enter a valid national code" },
-      },
     },
     city: {
       type: DataTypes.STRING,
@@ -95,7 +84,7 @@ const User = sequelize.define(
       },
     },
     nationalId: {
-      type: DataTypes.STRING,
+      type: DataTypes.BIGINT,
       allowNull: true,
       validate: {
         notEmpty: {
@@ -105,15 +94,15 @@ const User = sequelize.define(
         isInt: { msg: "pleas provide a valid national id" },
       },
     },
-    registerationCode: {
-      type: DataTypes.STRING,
+    registrationCode: {
+      type: DataTypes.BIGINT,
       allowNull: true,
       validate: {
-        notEmpty: { msg: "pleas enter a valid registeration code" },
+        notEmpty: { msg: "pleas enter a valid registration code" },
         isInt: {
           msg: "pleas provide a valid registration code",
         },
-        len: { args: [4, 6], msg: "pleas enter a valid registeration code" },
+        len: { args: [4, 6], msg: "pleas enter a valid registration code" },
       },
     },
     address: {
@@ -137,7 +126,7 @@ const User = sequelize.define(
       },
     },
     telephoneNumber: {
-      type: DataTypes.STRING,
+      type: DataTypes.BIGINT,
       allowNull: true,
       validate: {
         notEmpty: {
@@ -145,7 +134,7 @@ const User = sequelize.define(
         },
         is: {
           args: regularExpressionist,
-          msg: "pleas provid a valid telephone number",
+          msg: "pleas provide a valid telephone number",
         },
       },
     },
@@ -169,9 +158,10 @@ const User = sequelize.define(
     createdAt: true,
     updatedAt: true,
     indexes: [
-      { unique: true, fields: ["id"] },
       { unique: true, fields: ["phoneNumber"] },
-      { unique: true, fields: ["nationalCode"] },
+      { unique: true, fields: ["nationalID"] },
+      { unique: true, fields: ["postalCode"] },
+      { unique: true, fields: ["registrationCode"] },
     ],
   },
 );

@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   addSim,
@@ -6,22 +6,21 @@ const {
   updateSim,
   deleteSim,
   getSingleSim,
-  getAllSimsFromUnkUser,
   getAllUserSims,
   payment,
-} = require('../controllers/simController');
-const { authenticateUser } = require('../middleware/authentication');
+} = require("../controllers/simController");
+const { authenticateUser } = require("../middleware/authentication");
+
+router.route("/api/sim").get(getAllSims).post(authenticateUser, addSim);
+
+router.route("/api/userSims").get(authenticateUser, getAllUserSims);
 
 router
-  .route('/api/sim')
-  .get(getAllSims)
-  .post(authenticateUser, addSim)
+  .route("/api/sim/:id")
+  .get(getSingleSim)
   .patch(authenticateUser, updateSim)
   .delete(authenticateUser, deleteSim);
-router.route('/api/userSims').get(authenticateUser, getAllUserSims);
-router.route('/api/unkUserSims').post(getAllSimsFromUnkUser);
-router.use('/api/sim/payments', payment);
 
-router.route('/api/sim/:phoneNumber').get(getSingleSim);
+router.use("/api/sim/payments", payment);
 
 module.exports = router;

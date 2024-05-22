@@ -5,9 +5,14 @@ const {
   NotFoundError,
   UnauthorizedError,
 } = require("../errors");
+
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const Iran = require("../commen/utils/iran");
+const {
+  verifyNationalCode,
+  verifyNationalID,
+} = require("../commen/utils/verifyNationalCard");
 const { publishDirectMessage } = require("../queues/producer");
 
 const createUser = async (req, res) => {
@@ -48,8 +53,7 @@ const createUser = async (req, res) => {
   ) {
     throw new BadRequestError("'invalid information's for creating account");
   }
-  // searching in both tables (legal users & normal users)
-  let isUserExist = await User.findOne({ where: { phoneNumber } });
+  let isUserExist = await User.findByPk(phoneNumber);
   if (isUserExist) {
     throw new BadRequestError("user already exist");
   }
@@ -60,6 +64,8 @@ const createUser = async (req, res) => {
   if (!Iran[province].includes(city)) {
     throw new BadRequestError("invalid city and province");
   }
+  nationalId ? verifyNationalID(nationalId) : null;
+  nationalCode ? verifyNationalCode(nationalCode) : null;
   const user = await User.create({
     phoneNumber,
     userType,
@@ -91,7 +97,7 @@ const createUser = async (req, res) => {
   };
   await publishDirectMessage("User", "register", message);
   res
-    .cookie("token", user.dataValues.id, {
+    .cookie("token", user.dataValues.phoneNumber, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),
@@ -128,7 +134,7 @@ const createAdmin = async (req, res) => {
     userType: "Admin",
   });
   res
-    .cookie("token", admin.dataValues.id, {
+    .cookie("token", admin.dataValues.phoneNumber, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),
@@ -148,7 +154,7 @@ const createAdmin = async (req, res) => {
 
 const login = async (req, res) => {
   const { phoneNumber, password } = req.body;
-  let user = await User.findOne({ where: { phoneNumber } });
+  let user = await User.findByPk(phoneNumber);
   if (!user) {
     throw new NotFoundError("cant find any user with this phone number");
   }
@@ -157,7 +163,7 @@ const login = async (req, res) => {
     throw new UnauthorizedError("password does not matched");
   }
   res
-    .cookie("token", user.dataValues.id, {
+    .cookie("token", user.dataValues.phoneNumber, {
       httpOnly: true,
       secure: true,
       expires: new Date(Date.now() + 100000000),

@@ -6,17 +6,23 @@ const regularExpressionPhone =
 const Sim = sequelize.define(
   "Sim",
   {
-    phoneNumber: {
-      type: DataTypes.STRING,
-      unique: true,
+    _id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
-      validate: {
-        is: {
-          args: regularExpressionPhone,
-          msg: "pleas provide a valid phone number",
-        },
-      },
+    },
+    ownerID: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+    },
+    preCode: {
+      type: DataTypes.SMALLINT,
+      allowNull: false,
+    },
+    phoneNumber: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
     operator: {
       type: DataTypes.STRING,
@@ -57,11 +63,12 @@ const Sim = sequelize.define(
     termsOfSale: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      values: [0, 1],
+      values: [0, 1, 2],
     },
     plan: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
       values: [0, 1, 3, 5],
     },
     province: {
@@ -92,18 +99,26 @@ const Sim = sequelize.define(
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: { msg: "pleas provide a valid description" },
-      },
-      defaultValue: "فاقد توضیحات",
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.BIGINT,
       allowNull: false,
     },
   },
-  { updatedAt: false, createdAt: true, indexes: [{ fields: ["payment"] }] },
+  {
+    updatedAt: false,
+    createdAt: true,
+    indexes: [
+      { unique: true, fields: ["_id"], using: "HASH" },
+      {
+        unique: true,
+        fields: ["phoneNumber", "preCode", "ownerID"],
+        using: "HASH",
+      },
+      { fields: ["createdAt", "payment"], using: "BTREE" },
+    ],
+  },
 );
 
 module.exports = Sim;

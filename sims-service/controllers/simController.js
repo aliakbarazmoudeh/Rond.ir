@@ -6,15 +6,14 @@ const Iran = require("../commen/utils/iran");
 const User = require("../models/User");
 const moment = require("moment");
 const createPayment = require("../commen/zarinpal/createPayment");
+const { verifyPhoneNumber } = require("../commen/utils/verifyPhoneNumber");
 const verifyPayment = require("../commen/zarinpal/verifyPayment");
-
-// TODO [] - clean the payment service
-// TODO [] - add free option for products
 
 const addSim = async (req, res) => {
   const owner = req.user;
   let {
-    phoneNumber,
+    preCode,
+    number: phoneNumber,
     operator,
     price,
     priceType,
@@ -43,14 +42,15 @@ const addSim = async (req, res) => {
     throw new BadRequestError("User cant add sim card, has to buy premium");
   }
 
-  const isSimExist = await Sim.findByPk(phoneNumber);
+  const isSimExist = await Sim.findOne({ where: { preCode, phoneNumber } });
   if (isSimExist) {
     throw new BadRequestError("sim already exist");
   }
-
+  verifyPhoneNumber(preCode, phoneNumber);
   const sim = await Sim.create({
+    preCode,
     phoneNumber,
-    owner,
+    ownerID: owner,
     operator,
     price,
     status,
@@ -90,13 +90,16 @@ const getAllSims = async (req, res) => {
   let where = {
     payment: true,
   };
-  req.query.operator ? (where.operator = req.query.operator.split(",")) : null;
-  req.query.areaCode
-    ? (where.phoneNumber = { [Op.startsWith]: `%${req.query.areaCode}%` })
-    : null;
+  req.query.preCode ? (where.preCode = req.query.preCode.split(",")) : null;
   req.query.number
-    ? (where.phoneNumber = { [Op.like]: `%${req.query.number}%` })
+    ? (where.phoneNumber = {
+        [Op.regexp]: `^${req.query.phoneNumber
+          .split(",")
+          .map((item) => (item === null ? "." : item))
+          .join("")}$`,
+      })
     : null;
+  req.query.operator ? (where.operator = req.query.operator.split(",")) : null;
   req.query.phoneNumberType
     ? (where.phoneNumberType = req.query.phoneNumberType.split(","))
     : null;
@@ -123,12 +126,6 @@ const getAllSims = async (req, res) => {
   }
   const sims = await Sim.findAndCountAll({
     where: where,
-    include: [
-      {
-        model: User,
-        attributes: ["phoneNumber", "telephoneNumber"],
-      },
-    ],
     order: orderArray,
     limit: parseInt(req.query.limit) || 10,
     offset: parseInt(req.query.offset) || 0,
@@ -137,9 +134,9 @@ const getAllSims = async (req, res) => {
 };
 
 const getSingleSim = async (req, res) => {
-  const phoneNumber = req.params.phoneNumber;
+  const phoneNumber = req.params.id;
   const sims = await Sim.findByPk(phoneNumber, {
-    include: [{ model: User }],
+    include: [{ model: User, include: [{ model: Sim }] }],
   });
   if (!sims) {
     throw new NotFoundError("cant find any number with this phone number");
@@ -147,33 +144,22 @@ const getSingleSim = async (req, res) => {
   res.status(StatusCodes.OK).json({ sims });
 };
 
-const getAllSimsFromUnkUser = async (req, res) => {
-  const { owner } = req.body;
-  const user = await User.findByPk(owner, { include: { model: Sim } });
-  if (!user)
-    throw new NotFoundError("cant find any data with this information's");
-  res.status(StatusCodes.OK).json({ user });
-};
-
 const getAllUserSims = async (req, res) => {
-  // using req.user for authentication assurance
-  const user = await User.findByPk(req.user, {
-    include: {
-      model: Sim,
-      order: [
-        ["plan", "desc"],
-        ["updatedAt", "desc"],
-      ],
-      limit: parseInt(req.query.limit) || null,
-      offset: parseInt(req.query.offset) || null,
-    },
+  const { ownerID } = req.body;
+  const user = await Sim.findAll({
+    where: { ownerID },
+    order: [["createdAt", "desc"]],
+    limit: parseInt(req.query.limit) || 20,
+    offset: parseInt(req.query.offset) || 0,
   });
   res.status(StatusCodes.OK).json({ user });
 };
 
 const updateSim = async (req, res) => {
+  const id = req.params.id;
+  const ownerID = req.user;
   const sim = await Sim.findOne({
-    where: { phoneNumber: req.body.phoneNumber, owner: req.user },
+    where: { _id: id, ownerID },
   });
   if (!sim) {
     throw new NotFoundError(
@@ -183,16 +169,15 @@ const updateSim = async (req, res) => {
   sim.set(req.body);
   await sim.save({
     fields: [
+      "preCode",
       "phoneNumber",
       "operator",
-      "areaCode",
       "number",
       "price",
       "status",
       "phoneNumberType",
       "rondType",
       "termsOfSale",
-      "level",
       "province",
       "city",
       "description",
@@ -204,8 +189,10 @@ const updateSim = async (req, res) => {
 };
 
 const deleteSim = async (req, res) => {
+  const id = req.params.id;
+  const ownerID = req.user;
   const sim = await Sim.findOne({
-    where: { phoneNumber: req.body.phoneNumber, owner: req.user },
+    where: { _id: id, ownerID },
   });
   if (!sim) {
     throw new NotFoundError("cant find any sim with this information's");
@@ -241,7 +228,6 @@ module.exports = {
   addSim,
   getAllSims,
   getSingleSim,
-  getAllSimsFromUnkUser,
   getAllUserSims,
   updateSim,
   deleteSim,
